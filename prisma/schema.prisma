@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model project_members {
+  project_id          Int
+  hospcode            String                @db.VarChar(5)
+  credit_balance      Int                   @default(0)
+  credit_reserved     Int                   @default(0)
+  is_active           Int                   
+  joined_at           DateTime              @default(now()) @db.DateTime(0)
+  created_at          DateTime              @default(now()) @db.DateTime(0)
+  updated_at          DateTime              @default(now()) @db.DateTime(0)
+
+  
+  @@id([project_id, hospcode])
+  @@index([hospcode], map: "idx_pm_hospcode")
+}
+
+
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model ai_services {
+  id                  Int                   @id @default(autoincrement())
+  name                String                @db.VarChar(100)
+  slug                String                @unique(map: "slug") @db.VarChar(100)
+  credit_cost         Int
+  is_active           Boolean               @default(true)
+  created_at          DateTime              @default(now()) @db.DateTime(0)
+  updated_at          DateTime              @default(now()) @db.DateTime(0)
+ 
+}
+
+
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model credit_logs {
+  id              Int       @id @default(autoincrement())
+  hospcode        Int?
+  project_id      Int?
+  change_type     String?   @db.VarChar(255)
+  change_amount   Int?
+  update_staff_id Int?
+  change_datetime DateTime? @db.DateTime(0)
+}
+
+model credit_projects {
+  id           Int     @id
+  project_name String? @db.VarChar(255)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model credit_topups {
+  id              Int             @id @default(autoincrement())
+  project_id      Int
+  hospcode        String          @db.VarChar(5)
+  amount          Int
+  payment_ref     String?         @db.VarChar(255)
+  status          String          @default("pending") @db.VarChar(20)
+  approved_at     DateTime?       @db.DateTime(0)
+  approved_by     Int?
+  created_at      DateTime        @default(now()) @db.DateTime(0)
+  updated_at      DateTime        @default(now()) @db.DateTime(0)
+  
+  @@index([project_id, hospcode], map: "fk_topup_member")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model credit_transactions {
+  id              Int             @id @default(autoincrement())
+  project_id      Int
+  hospcode        String          @db.VarChar(5)
+  ai_service_id   Int?
+  type            String          @db.VarChar(20)
+  amount          Int
+  balance_before  Int
+  balance_after   Int
+  status          String          @default("pending") @db.VarChar(20)
+  note            String?         @db.Text
+  created_at      DateTime        @default(now()) @db.DateTime(0)
+  
+  @@index([project_id, hospcode, created_at(sort: Desc)], map: "idx_txn_member")
+  @@index([ai_service_id], map: "idx_txn_service")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model credits {
+  id                   Int       @id @default(autoincrement())
+  hospcode             String?   @db.VarChar(5)
+  credits              Int?
+  project_id           Int?
+  create_datetime      DateTime? @db.DateTime(0)
+  last_update_datetime DateTime? @db.DateTime(0)
+}
