@@ -105,7 +105,7 @@ AND ai.is_active = 1
             amount: credit_cost,
             balance_before: balance_before,
             balance_after: balance_before - credit_cost,
-            status: 'success',
+            status: 'completed',
           },
         });
         return {
